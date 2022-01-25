@@ -32,7 +32,7 @@ std::string timeStampToHReadble(const time_t rawtime)
 int main(void)
 {
     CURL* curl;
-    CURLcode res;
+   
 
     Json::Reader reader;
     Json::Value js;
@@ -42,57 +42,58 @@ int main(void)
     curl = curl_easy_init();
     if (curl) {
 
-        std::string city = "London";
-        std::string url = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + APIKEY::openWeatherMap+"&lang=pl&units=metric";
-        const char* urlC = url.c_str();
-        curl_easy_setopt(curl, CURLOPT_URL, urlC);
 
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);//podazanie za przekierowaniami
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);//obsluga "zapisu" danych
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-        response.clear();
+        std::string city = "Gliwice";
+        std::cout << "Podaj miasto" << std::endl;
+        std::cin >> city;
+            response.clear();
+            std::string url = "http://api.openweathermap.org/data/2.5/weather/?q=" + city + "&appid=" + APIKEY::openWeatherMap + "&lang=pl&units=metric";
+            const char* urlC = url.c_str();
+
+            curl_easy_setopt(curl, CURLOPT_URL, urlC);
+
+            /* Perform the request, res will get the return code */
+            CURLcode res = curl_easy_perform(curl);
+            /* Check for errors */
+            if (res != CURLE_OK)
+                fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+
+            /* always cleanup */
+            curl_easy_cleanup(curl);
 
 
-        /* Perform the request, res will get the return code */
-        res = curl_easy_perform(curl);
-        /* Check for errors */
-        if (res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
-
-        /* always cleanup */
-        curl_easy_cleanup(curl);
-
-
-        if (reader.parse(response, js))
-        {
-
-            int code;
-            code = js.get("cod", 0).asInt();
-            if (code == 200)
+            if (reader.parse(response, js))
             {
-               /* std::cout << "code: " << code << std::endl;*/
-               std::cout << js.toStyledString() << std::endl; // Wyświetl całość w postaci tekstu
 
-                //const Json::Value data_mainweather = js["main"];
-                //const Json::Value data_main = js["main"];
-                //const Json::Value data_wind = js["main"];
-                std::cout << "Miasto: " << js.get("name", "brak danych").asString() << std::endl;
-                std::cout << "Temperatura: " << round(js.get("main", "brak danych")["temp"].asDouble()*100)/100 << "°C"<< std::endl;
-                std::cout << "Temperatura odczuwalna: " << round(js.get("main", "brak danych")["feels_like"].asDouble()*100)/100 << "°C" << std::endl;
-                std::cout << "Cisnienie: " << js.get("main", "brak danych")["feels_like"] << "hpa" << std::endl;
-                std::cout << "Wilgotnosc: " << js.get("main", "brak danych")["humidity"] << "%" << std::endl;
-                std::cout << "Prędkosc wiatru: " << round(js.get("wind", "brak danych")["speed"] .asDouble()*100)/100<< "m/s"<< std::endl;
-                std::cout << "Kierunek wiatru: " << js.get("wind", "brak danych")["deg"] << "°" << std::endl;
-                std::cout << "Zachmurzenie: " << js.get("clouds", "brak danych")["all"] << "%" << std::endl;
+                int code;
+                code = js.get("cod", 0).asInt();
+                if (code == 200)
+                {
+                    /* std::cout << "code: " << code << std::endl;*/
+                    //std::cout << js.toStyledString() << std::endl; // Wyświetl całość w postaci tekstu
 
+                     //const Json::Value data_mainweather = js["main"];
+                     //const Json::Value data_main = js["main"];
+                     //const Json::Value data_wind = js["main"];
+                    std::cout << "Miasto: " << js.get("name", "brak danych").asString() << std::endl;
+                    std::cout << "Temperatura: " << round(js.get("main", "brak danych")["temp"].asDouble() * 100) / 100 << "°C" << std::endl;
+                    std::cout << "Temperatura odczuwalna: " << round(js.get("main", "brak danych")["feels_like"].asDouble() * 100) / 100 << "°C" << std::endl;
+                    std::cout << "Cisnienie: " << (js.get("main", "brak danych")["pressure"].asInt()) << "hpa" << std::endl;
+                    std::cout << "Wilgotnosc: " << js.get("main", "brak danych")["humidity"] << "%" << std::endl;
+                    std::cout << "Predkosc wiatru: " << round(js.get("wind", "brak danych")["speed"].asDouble() * 100) / 100 << "m/s" << std::endl;
+                    std::cout << "Kierunek wiatru: " << js.get("wind", "brak danych")["deg"] << "°" << std::endl;
+                    std::cout << "Zachmurzenie: " << js.get("clouds", "brak danych")["all"] << "%" << std::endl;
+
+                }
+                else
+                {
+                    std::cout << "Error code: " << code << " : " << js.get("message", "brak danych") << std::endl;
+                }
             }
-            else
-            {
-                std::cout << "Error code: " << code<<" : " << js.get("message", "brak danych") << std::endl;
-            }
-        }
-
 
 
     }
