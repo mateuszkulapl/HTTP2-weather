@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <string>
-
+#include "key.h"
 
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
@@ -31,7 +31,7 @@ int main(void)
     Json::Value js;
     std::string response;
 
-
+    std::cout << APIKEY::openWeatherMap;
 
     curl = curl_easy_init();
     if (curl) {
