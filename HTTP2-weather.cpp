@@ -20,14 +20,6 @@ static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* use
     (*mem).append(cont, realsize);
     return realsize;
 }
-std::string timeStampToHReadble(const time_t rawtime)
-{
-    struct tm dt;
-    char buffer[30];
-    localtime_s(&dt , &rawtime);
-    strftime(buffer, sizeof(buffer), "%m%d%H%M%y", &dt);
-    return std::string(buffer);
-}
 
 int main(void)
 {
@@ -69,9 +61,21 @@ int main(void)
             if (reader.parse(response, js))
             {
 
-                int code;
-                code = js.get("cod", 0).asInt();
-                if (code == 200)
+                std::string code;//200, 401 jest jako liczba, ale 404 jako string
+                try {
+                    code = std::to_string(js.get("cod", 0).asInt());
+                }
+                catch (const std::exception& e)
+                {
+                    try {
+                        code = js.get("cod", "").asString();
+                    }
+                    catch (const std::exception& e)
+                    {
+                        std::cout << "ERROR" << std::endl;
+                    }
+                }
+                if (code == "200")
                 {
                     /* std::cout << "code: " << code << std::endl;*/
                     //std::cout << js.toStyledString() << std::endl; // Wyświetl całość w postaci tekstu
@@ -94,8 +98,6 @@ int main(void)
                     std::cout << "Error code: " << code << " : " << js.get("message", "brak danych") << std::endl;
                 }
             }
-
-
     }
     return 0;
 }
